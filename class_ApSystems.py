@@ -1,4 +1,5 @@
 import requests
+import json
 from datetime import datetime
 from bs4 import BeautifulSoup
 
@@ -59,7 +60,39 @@ class ApSystems:
                             headers=self.headers, cookies=self.mainpage_cookies)
 
         if res.status_code == 200:
-            return res.text
+            array_final = {}
+            temp_power = {}
+            data = json.loads(res.text)
+            array_time = data['time'].split(',')
+
+            # Primeiro processa os dados de power:
+            array_power = data['power'].split(',')
+            x = 0
+            for time in array_time:
+                temp_power[x] = {
+                    'datetime': datetime.fromtimestamp((int(time) + 8 * 60 * 60 * 1000) / 1000),
+                    'power': array_power[x]
+                }
+                x += 1
+            array_final['power'] = temp_power
+
+            temp_power = {}
+            ecu_list = data['detail'].split('&')
+            for ecu_data in ecu_list:
+                temp_ecu_power = {}
+                sub_ecu = ecu_data.split('/')
+                ecu = sub_ecu[0]
+                ecu_power = sub_ecu[1].split(',')
+                x = 0
+                for power in ecu_power:
+                    temp_ecu_power[x] = {
+                        'datetime': datetime.fromtimestamp((int(array_time[x]) + 8 * 60 * 60 * 1000) / 1000),
+                        'power': power
+                    }
+                    x += 1
+                temp_power[ecu] = temp_ecu_power
+            array_final['ecu_power'] = temp_power
+            return array_final
         return False
 
 
