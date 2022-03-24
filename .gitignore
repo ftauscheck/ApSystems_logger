@@ -130,3 +130,6 @@ dmypy.json
 
 # ConfigParser configuration file
 config.ini
+
+# Suport files
+Suport/*
