@@ -49,6 +49,7 @@ class ApSystems:
                 self._ecu = var_page.get('en')
                 self._vid = var_page.get('value')
                 self._iid = var_page.get('iid')
+                self._ecu = var_page.get('en')
                 self._logged = True
 
     def is_logged(self):
@@ -92,5 +93,6 @@ class ApSystems:
                     x += 1
                 temp_power[ecu] = temp_ecu_power
             array_final['ecu_power'] = temp_power
+            array_final['ecu'] = self._ecu
             return array_final
         return False

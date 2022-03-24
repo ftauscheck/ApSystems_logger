@@ -17,13 +17,22 @@ conexao = ApSystems(config_main["domain"], config_main["useragent"], config_main
 if conexao.is_logged():
     retorno = conexao.get_power(20220224)
     for linha in retorno['power']:
-        sql_insert = 'INSERT INTO solar.power (time, power) VALUES (%s, %s);'
+        sql_insert = 'INSERT INTO solar.power (time, ecu, power) VALUES (%s, %s, %s);'
         cur_mysql.execute(sql_insert, (retorno['power'][linha]['datetime'].strftime('%Y-%m-%d %H:%M:%S'),
+                                       retorno['ecu'],
                                        retorno['power'][linha]['power']))
     mydb.commit()
 
+    ecu_id = {}
+    cur_mysql.execute('select id, inverterInfoId from solar.panel;')
+    for row in cur_mysql:
+        ecu_id[row['inverterInfoId']] = row['id']
+
     for panel in retorno['ecu_power']:
+        print('Panel: {}'.format(panel))
         for linha in retorno['ecu_power'][panel]:
-            sql_insert = 'INSERT INTO solar.power_panel (time, power) VALUES (%s, %s);'
-            cur_mysql.execute(sql_insert, (retorno['power'][linha]['datetime'].strftime('%Y-%m-%d %H:%M:%S'),
-                                           retorno['power'][linha]['power']))
+            sql_insert = 'INSERT INTO solar.power_panel (time, power, panel) VALUES (%s, %s, %s);'
+            cur_mysql.execute(sql_insert, (retorno['ecu_power'][panel][linha]['datetime'].strftime('%Y-%m-%d %H:%M:%S'),
+                                           retorno['ecu_power'][panel][linha]['power'],
+                                           ecu_id[panel]))
+    mydb.commit()
