@@ -27,7 +27,7 @@ if conexao.is_logged():
     cur_mysql.execute('select id, inverterInfoId from solar.panel;')
     for row in cur_mysql:
         ecu_id[row['inverterInfoId']] = row['id']
-
+        
     for panel in retorno['ecu_power']:
         print('Panel: {}'.format(panel))
         for linha in retorno['ecu_power'][panel]:
